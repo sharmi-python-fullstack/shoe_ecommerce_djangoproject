@@ -18,13 +18,13 @@
             <div class="cart-image-wrap">
                 <a class="cart-item-image" href="{% url 'store:product_detail' slug=item.product.slug %}">
                     {% if item.product.image %}
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
+                    <img src="{{ item.product.display_image_url }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
                     {% else %}
                     <img src="{% static 'images/product-fallback.png' %}" alt="{{ item.product.name }}">
                     {% endif %}
                 </a>
                 {% if item.product.image %}
-                <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ item.product.image.url }}" data-zoom-alt="{{ item.product.name }}" aria-label="Zoom image of {{ item.product.name }}">
+                <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ item.product.display_image_url }}" data-zoom-alt="{{ item.product.name }}" aria-label="Zoom image of {{ item.product.name }}">
                 {% else %}
                 <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{% static 'images/product-fallback.png' %}" data-zoom-alt="{{ item.product.name }}" aria-label="Zoom image of {{ item.product.name }}">
                 {% endif %}

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.contrib.staticfiles.finders import find
+from django.templatetags.static import static
 
 User = get_user_model()
 
@@ -24,6 +26,17 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def display_image_url(self):
+        if not self.image:
+            return ''
+
+        filename = self.image.name.rsplit('/', 1)[-1]
+        static_path = f'images/products/{filename}'
+        if find(static_path):
+            return static(static_path)
+        return self.image.url
 
 
 class NewsletterSubscription(models.Model):

@@ -108,13 +108,13 @@
                     <div class="product-image-wrap">
                         <a class="product-image" href="{% url 'store:product_detail' slug=product.slug %}">
                             {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
+                            <img src="{{ product.display_image_url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
                             {% else %}
                             <img src="{% static 'images/product-fallback.png' %}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}';">
                             {% endif %}
                         </a>
                         {% if product.image %}
-                        <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ product.image.url }}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
+                        <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ product.display_image_url }}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
                         {% else %}
                         <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{% static 'images/product-fallback.png' %}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
                         {% endif %}

@@ -36,7 +36,7 @@ When running locally with Django `DEBUG=True`, submit the checkout form to open 
 - Password reset emails use Django's console email backend in local development; reset links appear in the runserver terminal.
 - Use **Products** to add or edit a product's name, slug, category, price, description, and image.
 - The public header's **Log in** link opens the Django admin sign-in page.
-- Product uploads are stored under `media/products/`; if no image is uploaded, the supplied shoe image is used.
+- Product uploads are stored under `media/products/`; the bundled demo-product images are also included as static assets so they load on Render. For durable images uploaded through Django Admin in production, configure persistent media storage.
 - The optional `figma_products` fixture adds the four featured products and their supplied images.
 - The **Womens**, **Mens**, **Kids**, **Brands**, and **Offers** menus open the prototype-style navigation panels. Category and style links filter the catalogue.
 - Selecting Womens, Mens, or Kids in the navigation opens that category's catalogue. The demo-category fixture supplies sample mens and kids products with images; categorize products you add in Django Admin using the Product category field.

@@ -48,6 +48,45 @@ class ProductListTests(TestCase):
         self.assertContains(detail_response, 'data-zoom-out')
         self.assertContains(detail_response, 'data-zoom-reset')
 
+    def test_bundled_product_images_use_distinct_static_urls(self):
+        first = Product.objects.create(
+            name='Boat Shoe',
+            slug='boat-shoe',
+            price='1000.00',
+            image='products/harlan-mens-tan-boat-shoe.png',
+        )
+        second = Product.objects.create(
+            name='Black Loafer',
+            slug='black-loafer',
+            price='1200.00',
+            image='products/kingsley-mens-black-loafer.png',
+        )
+
+        catalogue_response = self.client.get(reverse('store:product_list'))
+        detail_response = self.client.get(
+            reverse('store:product_detail', args=[first.slug])
+        )
+        self.client.get(reverse('store:add_to_cart', args=[first.id]))
+        cart_response = self.client.get(reverse('store:cart_detail'))
+
+        self.assertContains(
+            catalogue_response,
+            f'/static/images/products/{first.image.name.rsplit("/", 1)[-1]}',
+        )
+        self.assertContains(
+            catalogue_response,
+            f'/static/images/products/{second.image.name.rsplit("/", 1)[-1]}',
+        )
+        self.assertContains(
+            detail_response,
+            f'/static/images/products/{first.image.name.rsplit("/", 1)[-1]}',
+        )
+        self.assertContains(
+            cart_response,
+            f'/static/images/products/{first.image.name.rsplit("/", 1)[-1]}',
+        )
+        self.assertNotEqual(first.display_image_url, second.display_image_url)
+
     def test_search_filters_products_by_name_and_description(self):
         Product.objects.create(
             name='Classic Sandal',

@@ -7,8 +7,8 @@
     <div class="grid">
         <div class="image">
             {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
-            <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ product.image.url }}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
+            <img src="{{ product.display_image_url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
+            <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ product.display_image_url }}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
             {% else %}
             <img src="{% static 'images/product-fallback.png' %}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}';">
             <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{% static 'images/product-fallback.png' %}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
