@@ -1,0 +1,200 @@
+[
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Harlan Mens Tan Boat Shoe",
+      "slug": "harlan-mens-tan-boat-shoe",
+      "description": "A classic tan boat shoe for everyday wear.",
+      "price": "2799.00",
+      "category": "men",
+      "image": "products/harlan-mens-tan-boat-shoe.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Osaga Mens Navy Trainer",
+      "slug": "osaga-mens-navy-trainer",
+      "description": "A lightweight navy trainer with a comfortable sole.",
+      "price": "3199.00",
+      "category": "men",
+      "image": "products/osaga-mens-navy-trainer.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Rothwell Mens Brown Leather Shoe",
+      "slug": "rothwell-mens-brown-leather-shoe",
+      "description": "A smart leather shoe for work and occasions.",
+      "price": "3499.00",
+      "category": "men",
+      "image": "products/rothwell-mens-brown-leather-shoe.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Blue Ridge Mens Casual Shoe",
+      "slug": "blue-ridge-mens-casual-shoe",
+      "description": "A versatile blue casual shoe with an easy everyday fit.",
+      "price": "2999.00",
+      "category": "men",
+      "image": "products/blue-ridge-mens-casual-shoe.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Kingsley Mens Black Loafer",
+      "slug": "kingsley-mens-black-loafer",
+      "description": "A clean, comfortable black loafer.",
+      "price": "2599.00",
+      "category": "men",
+      "image": "products/kingsley-mens-black-loafer.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Oxford Mens Formal Shoe",
+      "slug": "oxford-mens-formal-shoe",
+      "description": "A polished formal shoe for office and special occasions.",
+      "price": "3999.00",
+      "category": "men",
+      "image": "products/oxford-mens-formal-shoe.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Whitby Girls White Marble Clog",
+      "slug": "whitby-girls-white-marble-clog",
+      "description": "A fun, lightweight clog for kids.",
+      "price": "2799.00",
+      "category": "kids",
+      "image": "products/whitby-girls-white-marble-clog.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Walkright Girls Blue Canvas Shoe",
+      "slug": "walkright-girls-blue-canvas-shoe",
+      "description": "A playful blue canvas shoe with an easy fastening strap.",
+      "price": "3199.00",
+      "category": "kids",
+      "image": "products/walkright-girls-blue-canvas-shoe.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Walkright Girls Pink Polka Dot Canvas",
+      "slug": "walkright-girls-pink-polka-dot-canvas",
+      "description": "A cheerful pink canvas shoe with a comfortable fit.",
+      "price": "2699.00",
+      "category": "kids",
+      "image": "products/walkright-girls-pink-polka-dot-canvas.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Charlotte Girls Multi T-Bar Sandal",
+      "slug": "charlotte-girls-multi-t-bar-sandal",
+      "description": "A colorful T-bar sandal for sunny days.",
+      "price": "4799.00",
+      "category": "kids",
+      "image": "products/charlotte-girls-multi-t-bar-sandal.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Cherish Girls Pink Bootie",
+      "slug": "cherish-girls-pink-bootie",
+      "description": "A soft, cozy pink bootie for little feet.",
+      "price": "2999.00",
+      "category": "kids",
+      "image": "products/cherish-girls-pink-bootie.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "LOL Surprise Kids Fasten Slipper",
+      "slug": "lol-surprise-kids-fasten-slipper",
+      "description": "A bright character slipper with a comfortable sole.",
+      "price": "2799.00",
+      "category": "kids",
+      "image": "products/lol-surprise-kids-fasten-slipper.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Bluey Kids Easy Fasten Slipper",
+      "slug": "bluey-kids-easy-fasten-slipper",
+      "description": "An easy-fasten slipper with a soft, supportive footbed.",
+      "price": "4999.00",
+      "category": "kids",
+      "image": "products/bluey-kids-easy-fasten-slipper.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Spider-Man Kids Red Light Up Trainer",
+      "slug": "spider-man-kids-red-light-up-trainer",
+      "description": "A fun red and navy trainer for everyday adventures.",
+      "price": "5799.00",
+      "category": "kids",
+      "image": "products/spider-man-kids-red-light-up-trainer.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Disney Stitch Kids Clog",
+      "slug": "disney-stitch-kids-clog",
+      "description": "A lightweight character clog with a secure heel strap.",
+      "price": "3999.00",
+      "category": "kids",
+      "image": "products/disney-stitch-kids-clog.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Disney Frozen Kids Purple Sandal",
+      "slug": "disney-frozen-kids-purple-sandal",
+      "description": "A colorful purple sandal designed for easy wear.",
+      "price": "5599.00",
+      "category": "kids",
+      "image": "products/disney-frozen-kids-purple-sandal.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Shoezone Kids Black Welly",
+      "slug": "shoezone-kids-black-welly",
+      "description": "A durable black wellington boot for rainy days.",
+      "price": "4999.00",
+      "category": "kids",
+      "image": "products/shoezone-kids-black-welly.png"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Shoezone Kids Unicorn Glitter Welly",
+      "slug": "shoezone-kids-unicorn-glitter-welly",
+      "description": "A glittery unicorn-print wellington boot.",
+      "price": "2799.00",
+      "category": "kids",
+      "image": "products/shoezone-kids-unicorn-glitter-welly.png"
+    }
+  }
+]

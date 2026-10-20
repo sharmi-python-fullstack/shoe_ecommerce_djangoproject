@@ -1,0 +1,46 @@
+[
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Ophelia Womens Silver Diamante Heel",
+      "slug": "ophelia-womens-silver-diamante-heel",
+      "description": "",
+      "price": "2299.00",
+      "category": "women",
+      "image": "products/ophelia-womens-silver-diamante-heel.jpg"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Billie Womens Silver Diamante Heel",
+      "slug": "billie-womens-silver-diamante-heel",
+      "description": "",
+      "price": "3000.00",
+      "category": "women",
+      "image": "products/billie-womens-silver-diamante-heel.jpg"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Drew Womens Blush Diamante Slip On Shoe",
+      "slug": "drew-womens-blush-diamante-slip-on-shoe",
+      "description": "",
+      "price": "2599.00",
+      "category": "women",
+      "image": "products/drew-womens-blush-diamante-slip-on-shoe.jpg"
+    }
+  },
+  {
+    "model": "store.product",
+    "fields": {
+      "name": "Drew Womens Navy Diamante Slip On Shoe",
+      "slug": "drew-womens-navy-diamante-slip-on-shoe",
+      "description": "",
+      "price": "1299.00",
+      "category": "women",
+      "image": "products/drew-womens-navy-diamante-slip-on-shoe.jpg"
+    }
+  }
+]

@@ -1,0 +1,31 @@
+{% extends "store/base.html" %}
+{% load static humanize %}
+{% block title %}{{ product.name }} | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    <div class="grid">
+        <div class="image">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
+            <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ product.image.url }}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
+            {% else %}
+            <img src="{% static 'images/product-fallback.png' %}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}';">
+            <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{% static 'images/product-fallback.png' %}" data-zoom-alt="{{ product.name }}" aria-label="Zoom image of {{ product.name }}">
+            {% endif %}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                    <path d="m15.5 15.5 5 5M10.5 7v7m-3.5-3.5h7"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="info">
+            <h2>{{ product.name }}</h2>
+            <p class="price">₹ {{ product.price|floatformat:0|intcomma }}</p>
+            <p>{{ product.description|linebreaks }}</p>
+            <a class="btn" href="{% url 'store:add_to_cart' product_id=product.id %}">Add to Cart</a>
+            <a class="btn" href="{% url 'store:product_list' %}">Back to catalogue</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

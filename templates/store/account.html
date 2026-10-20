@@ -1,0 +1,45 @@
+{% extends "store/base.html" %}
+{% block title %}{% if mode == 'register' %}Register{% else %}Log in{% endif %} | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="account-page">
+    <section class="account-card" aria-labelledby="account-heading">
+        <div class="account-tabs">
+            <a class="{% if mode == 'login' %}is-current{% endif %}" href="{% url 'store:account' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Log in</a>
+            <a class="{% if mode == 'register' %}is-current{% endif %}" href="{% url 'store:account' %}?mode=register">Register</a>
+        </div>
+        <h1 class="visually-hidden" id="account-heading">{% if mode == 'register' %}Create your account{% else %}Log in to StepUp{% endif %}</h1>
+        {% if errors %}
+        <div class="account-errors" role="alert">
+            {% for error in errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        <form method="post" class="account-form">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="{{ mode }}">
+            <input type="hidden" name="next" value="{{ next }}">
+            <label for="account-email">Email id</label>
+            <input id="account-email" type="email" name="email" value="{{ email }}" placeholder="Enter your email" autocomplete="email" required>
+            <label for="account-password">Password</label>
+            <input id="account-password" type="password" name="password" placeholder="Enter password" autocomplete="{% if mode == 'register' %}new-password{% else %}current-password{% endif %}" required>
+            {% if mode == 'register' %}
+            <label for="account-password-confirm">Confirm password</label>
+            <input id="account-password-confirm" type="password" name="password_confirm" placeholder="Confirm password" autocomplete="new-password" required>
+            {% else %}
+            <a class="forgot-password" href="{% url 'password_reset' %}">Forgot Password?</a>
+            {% endif %}
+            <button type="submit">{% if mode == 'register' %}Register{% else %}Log In{% endif %}</button>
+        </form>
+        {% if mode == 'login' %}
+        <div class="account-divider"><span>Or</span></div>
+        <button class="account-google" type="button" disabled title="Google sign-in is not configured">
+            Continue with Google <span aria-hidden="true">G</span>
+        </button>
+        <p class="account-switch">Don't have an account? <a href="{% url 'store:account' %}?mode=register">Register</a></p>
+        {% else %}
+        <p class="account-switch">Already have an account? <a href="{% url 'store:account' %}">Log in</a></p>
+        {% endif %}
+        <p class="account-admin-link"><a href="{% url 'admin:login' %}">Store administrator login</a></p>
+    </section>
+</div>
+{% endblock %}

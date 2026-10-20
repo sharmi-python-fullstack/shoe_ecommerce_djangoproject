@@ -1,0 +1,35 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}About StepUp | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width editorial-page about-page">
+    <a class="page-back" href="{% url 'store:product_list' %}">← Back</a>
+    <section class="about-story">
+        <div class="about-story-copy">
+            <h1>About StepUp</h1>
+            <p>StepUp is India's largest sports and athleisure footwear brand. Incorporated in 2006, StepUp Activewear is one of the leading players in organized sports and casual footwear in India. Since 2016, the flagship brand "StepUp" has been the largest sports and athleisure footwear brand in India, in both volume and value terms. Our products are available through an expansive network of stores and online.</p>
+            <h2>Our Mission</h2>
+            <p>At StepUp we craft shoes with care for everyone — men, women and kids — with equal attention to detail, letting each shoe speak for itself. World-class quality, trendy designs and affordable prices make StepUp a brand for young adults, everyday performers and fashionistas.</p>
+        </div>
+        <img class="about-story-image" src="{% static 'images/figma_assets/IMG_20250601_182321_982.jpg' %}" alt="Colorful StepUp shoes" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}';">
+    </section>
+    <section class="about-values" aria-label="Our values">
+        <img src="{% static 'images/figma_assets/IMG_20250601_181700_867.jpg' %}" alt="StepUp shoes for all ages" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}';">
+        <div class="about-value-grid">
+            <article>
+                <h2>Simplicity in Design</h2>
+                <p>No flashy logos, no senseless details. Just comfortable shoes, made naturally and designed practically. It's that simple.</p>
+            </article>
+            <article>
+                <h2>Confidence in Comfort</h2>
+                <p>Try our shoes and discover dependable comfort, thoughtful support and a fit that feels right for every step.</p>
+            </article>
+            <article>
+                <h2>Made from Nature</h2>
+                <p>We look for thoughtful materials and more considered choices to make shoes you can feel good about wearing.</p>
+            </article>
+        </div>
+    </section>
+</div>
+{% endblock %}

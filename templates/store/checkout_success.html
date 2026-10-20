@@ -1,0 +1,13 @@
+{% extends "store/base.html" %}
+{% load humanize %}
+{% block title %}Order Confirmation | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width checkout-page">
+<h1>{% if test_payment %}🙂 Your order was placed!{% else %}Your order was placed!{% endif %}</h1>
+<p>Order <strong>#{{ order.id }}</strong> is confirmed.</p>
+<p>Total amount: ₹ {{ order.total_amount|floatformat:2|intcomma }}</p>
+{% if test_payment %}<p class="payment-demo-disclaimer">This was a test payment simulation. No money was taken.</p>{% endif %}
+<a href="{% url 'store:product_list' %}">Continue Shopping</a>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}Contact Us | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width editorial-page contact-page">
+    <a class="page-back" href="{% url 'store:product_list' %}">← Back</a>
+    <section class="contact-hero">
+        <div class="contact-details">
+            <h1>Contact Us</h1>
+            <h2>For Online Orders</h2>
+            <p>Inquiry / Complaint<br><a href="tel:9976357250">9976357250</a></p>
+            <p>Any other queries<br><a href="tel:9976357250">9976357250</a></p>
+            <p>10 AM–7:00 PM</p>
+            <p>Email: <a href="mailto:customercarestepup.in@gmail.com">customercarestepup.in@gmail.com</a></p>
+        </div>
+        <img src="{% static 'images/figma_assets/IMG_20250530_194707_093.jpg' %}" alt="Explore colorful StepUp shoes" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}';">
+    </section>
+    <section class="enquiry-section">
+        <h2>Enquiry Form</h2>
+        <form method="post" class="enquiry-form">
+            {% csrf_token %}
+            <label class="enquiry-name">Name
+                <input type="text" name="name" autocomplete="name" maxlength="150" required>
+            </label>
+            <label>Email
+                <input type="email" name="email" autocomplete="email" required>
+            </label>
+            <label>Phone
+                <input type="tel" name="phone" autocomplete="tel" maxlength="30">
+            </label>
+            <label class="enquiry-message">Message
+                <textarea name="message" rows="6" required></textarea>
+            </label>
+            <button type="submit">Send</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

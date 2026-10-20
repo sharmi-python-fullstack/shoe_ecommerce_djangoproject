@@ -1,0 +1,35 @@
+{% extends "store/base.html" %}
+{% load humanize %}
+{% block title %}Test Checkout | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width checkout-page">
+    <a class="page-back" href="{% url 'store:cart_detail' %}">← Back to cart</a>
+    <h1>Test checkout</h1>
+    <section class="checkout-summary" aria-labelledby="checkout-summary-title">
+        <h2 id="checkout-summary-title">Order summary</h2>
+        {% for item in items %}
+        <p>
+            <span>{{ item.product.name }} × {{ item.quantity }}{% if item.size %} (size {{ item.size }}){% endif %}</span>
+            <strong>₹ {{ item.line_total|floatformat:2|intcomma }}</strong>
+        </p>
+        {% endfor %}
+        <p class="checkout-total"><span>Total (INR)</span><strong>₹ {{ total|floatformat:2|intcomma }}</strong></p>
+    </section>
+
+    <form class="checkout-form" method="post" action="{% url 'store:checkout' %}">
+        {% csrf_token %}
+        <label for="shipping-address">Shipping address</label>
+        <textarea id="shipping-address" name="shipping_address" maxlength="255" autocomplete="street-address" required></textarea>
+        <label for="billing-address">Billing address</label>
+        <textarea id="billing-address" name="billing_address" maxlength="255" autocomplete="street-address" required></textarea>
+        {% if demo_payments_enabled %}
+        <button class="cart-checkout" type="submit">Continue to test payment</button>
+        <p class="payment-demo-disclaimer">Test only: the next step is a simulated payment page. No money will be taken.</p>
+        {% else %}
+        <p class="checkout-unavailable" role="status">The simulated payment page is only available in development mode.</p>
+        <button class="cart-checkout" type="submit" disabled>Test payment unavailable</button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

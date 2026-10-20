@@ -1,0 +1,116 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% load humanize %}
+{% block title %}Your Cart | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width cart-page">
+    <a class="page-back" href="{% url 'store:product_list' %}">← Continue shopping</a>
+    <h1>Shopping Cart</h1>
+    {% if items %}
+    <div class="delivery-note">
+        <strong>Free &amp; Fast arriving by Monday</strong>
+        <span>Order within 23 hours, 53 minutes, 50 seconds</span>
+    </div>
+    <section class="cart-items" aria-label="Items in your cart">
+        {% for item in items %}
+        <article class="cart-item">
+            <div class="cart-image-wrap">
+                <a class="cart-item-image" href="{% url 'store:product_detail' slug=item.product.slug %}">
+                    {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" onerror="this.onerror=null;this.src='{% static 'images/product-fallback.png' %}';">
+                    {% else %}
+                    <img src="{% static 'images/product-fallback.png' %}" alt="{{ item.product.name }}">
+                    {% endif %}
+                </a>
+                {% if item.product.image %}
+                <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{{ item.product.image.url }}" data-zoom-alt="{{ item.product.name }}" aria-label="Zoom image of {{ item.product.name }}">
+                {% else %}
+                <button class="image-zoom-trigger" type="button" data-image-zoom data-zoom-src="{% static 'images/product-fallback.png' %}" data-zoom-alt="{{ item.product.name }}" aria-label="Zoom image of {{ item.product.name }}">
+                {% endif %}
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                        <path d="m15.5 15.5 5 5M10.5 7v7m-3.5-3.5h7"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="cart-item-info">
+                <a class="cart-item-name" href="{% url 'store:product_detail' slug=item.product.slug %}">{{ item.product.name }}</a>
+                <p>{{ item.product.description|default:"StepUp footwear" }}</p>
+                <strong>MRP₹ {{ item.product.price|floatformat:0|intcomma }}</strong>
+            </div>
+            <form class="cart-options" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update">
+                {% if request.user.is_authenticated %}
+                <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                {% else %}
+                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                {% endif %}
+                <label class="visually-hidden" for="size-{{ forloop.counter }}">Shoe size</label>
+                <select name="size" id="size-{{ forloop.counter }}" aria-label="Shoe size for {{ item.product.name }}" onchange="this.form.submit()">
+                    <option value="" {% if not item.size %}selected{% endif %} disabled>Choose size</option>
+                    {% for size in item.size_options %}
+                    <option value="{{ size }}" {% if size == item.size %}selected{% endif %}>Size ({{ size }})</option>
+                    {% endfor %}
+                </select>
+                <label class="visually-hidden" for="quantity-{{ forloop.counter }}">Quantity</label>
+                <select name="quantity" id="quantity-{{ forloop.counter }}" aria-label="Quantity for {{ item.product.name }}" onchange="this.form.submit()">
+                    {% for number in quantity_options %}
+                    <option value="{{ number }}" {% if number == item.quantity %}selected{% endif %}>Quantity ({{ number }})</option>
+                    {% endfor %}
+                </select>
+                <noscript><button type="submit">Update</button></noscript>
+            </form>
+            <form class="cart-remove" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="remove">
+                {% if request.user.is_authenticated %}
+                <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                {% else %}
+                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                {% endif %}
+                <button type="submit" aria-label="Remove {{ item.product.name }}">
+                    Remove
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M5 6h10l-.7 11H5.7L5 6Z"></path>
+                        <path d="M4 4h12M8 4V2h4v2m-3 4v6m2-6v6"></path>
+                    </svg>
+                </button>
+            </form>
+        </article>
+        {% endfor %}
+    </section>
+    <section class="cart-summary" aria-labelledby="cart-summary-title">
+        <h2 id="cart-summary-title">Summary</h2>
+        <p><span>Total</span><strong>₹ {{ total|floatformat:0|intcomma }}</strong></p>
+        <p><span>Delivery</span><strong>Free</strong></p>
+        <a class="delivery-info" href="{% url 'store:contact' %}">
+            Delivery &amp; return information
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 5h12v12H2zM14 9h4l4 4v4h-8z"></path>
+                <circle cx="6" cy="19" r="2"></circle>
+                <circle cx="18" cy="19" r="2"></circle>
+            </svg>
+        </a>
+    </section>
+    <section class="cart-payment" aria-label="Checkout and payment options">
+        <a class="cart-checkout" href="{% url 'store:checkout' %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+                <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+            </svg>
+            Checkout Securely
+        </a>
+        <h2>Test checkout</h2>
+        <p class="payment-demo-disclaimer">Demo only: simulate checkout with no real payment or charge.</p>
+    </section>
+    {% else %}
+    <div class="cart-empty">
+        <h2>Your cart is empty</h2>
+        <p>Find your next favorite pair in our collection.</p>
+        <a class="cart-checkout" href="{% url 'store:product_list' %}">Explore shoes</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

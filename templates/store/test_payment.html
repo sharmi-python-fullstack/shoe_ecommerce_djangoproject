@@ -1,0 +1,21 @@
+{% extends "store/base.html" %}
+{% load humanize %}
+{% block title %}Test Payment | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width checkout-page">
+    <a class="page-back" href="{% url 'store:cart_detail' %}">← Back to cart</a>
+    <h1>Test payment</h1>
+    <section class="checkout-summary" aria-labelledby="test-payment-summary">
+        <h2 id="test-payment-summary">Demo order #{{ order.id }}</h2>
+        <p><span>Amount to simulate</span><strong>₹ {{ order.total_amount|floatformat:2|intcomma }}</strong></p>
+    </section>
+    <p class="payment-demo-disclaimer">
+        This is a local test page, not a payment provider. Clicking below only simulates success; no money will be taken.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <button class="cart-checkout" type="submit">Simulate successful payment</button>
+    </form>
+</div>
+{% endblock %}
