@@ -15,9 +15,8 @@ python -m venv .venv
 pip install -r requirements.txt
 python manage.py migrate
 
-# Load the demo catalogue from the Figma design (run once)
-python manage.py loaddata figma_products
-python manage.py loaddata demo_category_products
+# Load the demo catalogue if the database is empty
+python manage.py seed_demo_products
 
 # Create an administrator account
 python manage.py createsuperuser
@@ -47,7 +46,7 @@ When running locally with Django `DEBUG=True`, submit the checkout form to open 
 ## Deployment (Render)
 1. Push the project to GitHub and create a Render **Web Service** from that repository.
 2. Use **Python 3** as the runtime and configure:
-   - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
+   - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed_demo_products`
    - **Start Command**: `gunicorn shoe_ecommerce.wsgi:application`
 3. Add a Render PostgreSQL database and set `DATABASE_URL` on the web service to its **Internal Database URL**.
 4. Set these web-service environment variables:
@@ -55,6 +54,8 @@ When running locally with Django `DEBUG=True`, submit the checkout form to open 
    - `SECRET_KEY` = a newly generated Django secret key
    - `ALLOWED_HOSTS` = the service hostname, for example `shoe-ecommerce.onrender.com`
    - `CSRF_TRUSTED_ORIGINS` = the full HTTPS origin, for example `https://shoe-ecommerce.onrender.com`
+
+The seed command adds the included demo products only when the catalogue is empty, so repeating it on later deploys does not overwrite products managed in Django Admin. To populate an existing deployment, update its build command and deploy again.
 
 The app uses SQLite for local development when `DATABASE_URL` is not set. Keep `db.sqlite3`, `.env`, and `cookie.jar` out of Git; uploaded media on Render's local filesystem is not persistent across deploys, so use object storage if you need durable product uploads.
 

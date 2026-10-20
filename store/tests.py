@@ -1,6 +1,8 @@
 from decimal import Decimal
+from io import StringIO
 
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -418,3 +420,19 @@ class ProductListTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertFalse(Order.objects.exists())
+
+
+class SeedDemoProductsCommandTests(TestCase):
+    def test_seeds_an_empty_catalogue_once_without_overwriting_products(self):
+        call_command('seed_demo_products', stdout=StringIO())
+
+        self.assertEqual(Product.objects.count(), 22)
+        product = Product.objects.get(slug='ophelia-womens-silver-diamante-heel')
+        product.price = Decimal('1.00')
+        product.save()
+
+        call_command('seed_demo_products', stdout=StringIO())
+
+        self.assertEqual(Product.objects.count(), 22)
+        product.refresh_from_db()
+        self.assertEqual(product.price, Decimal('1.00'))
