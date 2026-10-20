@@ -304,6 +304,18 @@ class ProductListTests(TestCase):
         self.assertContains(response, 'Test checkout')
         self.assertContains(response, 'simulate checkout with no real payment')
 
+    def test_checkout_offers_demo_express_payment_choices(self):
+        self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
+
+        response = self.client.get(reverse('store:checkout'))
+
+        self.assertContains(response, 'Express checkout')
+        self.assertContains(response, 'Google Pay')
+        self.assertContains(response, 'PayPal')
+        self.assertContains(response, 'Clearpay')
+        self.assertContains(response, 'Klarna')
+        self.assertContains(response, 'visual examples, not connected')
+
     def test_selected_size_is_saved_for_anonymous_cart_and_order(self):
         self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
 
@@ -450,6 +462,12 @@ class ProductListTests(TestCase):
 
     @override_settings(DEBUG=False)
     def test_demo_payment_is_disabled_outside_debug_mode(self):
+        self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
+        checkout_response = self.client.get(reverse('store:checkout'))
+        self.assertEqual(checkout_response.status_code, 200)
+        self.assertContains(checkout_response, 'Demo payments are disabled on this live site.')
+        self.assertContains(checkout_response, '<button class="express-payment-button express-google-pay" type="submit" disabled>')
+
         session = self.client.session
         session['cart'] = {str(self.product.id): 1}
         session.save()

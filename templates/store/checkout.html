@@ -23,13 +23,24 @@
         <textarea id="shipping-address" name="shipping_address" maxlength="255" autocomplete="street-address" required></textarea>
         <label for="billing-address">Billing address</label>
         <textarea id="billing-address" name="billing_address" maxlength="255" autocomplete="street-address" required></textarea>
-        {% if demo_payments_enabled %}
-        <button class="cart-checkout" type="submit">Continue to test payment</button>
-        <p class="payment-demo-disclaimer">Test only: the next step is a simulated payment page. No money will be taken.</p>
-        {% else %}
-        <p class="checkout-unavailable" role="status">The simulated payment page is only available in development mode.</p>
-        <button class="cart-checkout" type="submit" disabled>Test payment unavailable</button>
-        {% endif %}
+        <section class="express-checkout" aria-labelledby="express-checkout-title">
+            <h2 id="express-checkout-title">Express checkout</h2>
+            <p class="payment-demo-notice">
+                Demo only: these options are visual examples, not connected to Google Pay, PayPal,
+                Clearpay, or Klarna. No payment will be taken.
+            </p>
+            <div class="express-payment-options">
+                <button class="express-payment-button express-google-pay" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>Google Pay</button>
+                <button class="express-payment-button express-paypal" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>PayPal</button>
+                <button class="express-payment-button express-clearpay" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>Clearpay</button>
+                <button class="express-payment-button express-klarna" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>Klarna</button>
+            </div>
+            {% if demo_payments_enabled %}
+            <p class="payment-demo-disclaimer">Choose an option to continue to the simulated payment step.</p>
+            {% else %}
+            <p class="checkout-unavailable" role="status">Demo payments are disabled on this live site. Connect a payment provider to accept real payments.</p>
+            {% endif %}
+        </section>
     </form>
 </div>
 {% endblock %}
