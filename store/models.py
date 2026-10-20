@@ -94,13 +94,29 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     """An order created when a customer starts checkout."""
+    DEMO_PAYMENT_METHOD_CHOICES = [
+        ('google_pay', 'Google Pay'),
+        ('paypal', 'PayPal'),
+        ('clearpay', 'Clearpay'),
+        ('klarna', 'Klarna'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     shipping_address = models.CharField(max_length=255)
     billing_address = models.CharField(max_length=255)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     paid = models.BooleanField(default=False)
+    demo_payment_method = models.CharField(
+        max_length=20,
+        choices=DEMO_PAYMENT_METHOD_CHOICES,
+        blank=True,
+    )
     checkout_session_key = models.CharField(max_length=40, blank=True)
+
+    @property
+    def is_demo(self):
+        return bool(self.demo_payment_method)
 
     def __str__(self):
         return f"Order #{self.id} by {self.user}"

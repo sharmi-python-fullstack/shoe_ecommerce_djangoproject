@@ -4,9 +4,10 @@
 
 {% block content %}
 <div class="page-width checkout-page">
-<h1>{% if test_payment %}🙂 Your order was placed!{% else %}Your order was placed!{% endif %}</h1>
-<p>Order <strong>#{{ order.id }}</strong> is confirmed.</p>
+<h1>{% if demo_order %}Demo order recorded{% elif test_payment %}🙂 Your order was placed!{% else %}Your order was placed!{% endif %}</h1>
+<p>Order <strong>#{{ order.id }}</strong>{% if demo_order %} was recorded for demonstration only using {{ order.get_demo_payment_method_display }}.{% else %} is confirmed.{% endif %}</p>
 <p>Total amount: ₹ {{ order.total_amount|floatformat:2|intcomma }}</p>
+{% if demo_order %}<p class="payment-demo-notice">No payment was processed. This demo order is unpaid and is not a purchase.</p>{% endif %}
 {% if test_payment %}<p class="payment-demo-disclaimer">This was a test payment simulation. No money was taken.</p>{% endif %}
 <a href="{% url 'store:product_list' %}">Continue Shopping</a>
 </div>

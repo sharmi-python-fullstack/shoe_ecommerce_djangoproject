@@ -461,21 +461,66 @@ class ProductListTests(TestCase):
         self.assertTrue(order.paid)
 
     @override_settings(DEBUG=False)
-    def test_demo_payment_is_disabled_outside_debug_mode(self):
+    def test_demo_payment_options_record_unpaid_orders_on_live_site(self):
         self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
         checkout_response = self.client.get(reverse('store:checkout'))
         self.assertEqual(checkout_response.status_code, 200)
-        self.assertContains(checkout_response, 'Demo payments are disabled on this live site.')
-        self.assertContains(checkout_response, '<button class="express-payment-button express-google-pay" type="submit" disabled>')
-
+        self.assertContains(checkout_response, 'name="payment_method" value="google_pay"')
+        self.assertContains(checkout_response, 'name="payment_method" value="paypal"')
+        self.assertContains(checkout_response, 'name="payment_method" value="clearpay"')
+        self.assertContains(checkout_response, 'name="payment_method" value="klarna"')
         session = self.client.session
-        session['cart'] = {str(self.product.id): 1}
+        session['cart'] = {}
         session.save()
+
+        for payment_method in ('google_pay', 'paypal', 'clearpay', 'klarna'):
+            with self.subTest(payment_method=payment_method):
+                self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
+                response = self.client.post(
+                    reverse('store:checkout'),
+                    {
+                        'shipping_address': 'Shipping',
+                        'billing_address': 'Billing',
+                        'payment_method': payment_method,
+                    },
+                )
+                order = Order.objects.latest('pk')
+                self.assertRedirects(
+                    response,
+                    reverse('store:checkout_success', args=[order.pk]),
+                )
+                self.assertTrue(order.is_demo)
+                self.assertEqual(order.demo_payment_method, payment_method)
+                self.assertFalse(order.paid)
+                self.assertEqual(order.total_amount, Decimal('2999.00'))
+                self.assertFalse(self.client.session.get('cart'))
+
+                success_response = self.client.get(
+                    reverse('store:checkout_success', args=[order.pk])
+                )
+                self.assertContains(success_response, 'Demo order recorded')
+                self.assertContains(success_response, 'No payment was processed.')
+                self.assertContains(success_response, 'is unpaid')
+                self.assertContains(
+                    success_response,
+                    dict(Order.DEMO_PAYMENT_METHOD_CHOICES)[payment_method],
+                )
+
+                payment_response = self.client.post(
+                    reverse('store:test_payment', args=[order.pk])
+                )
+                self.assertEqual(payment_response.status_code, 404)
+
+    @override_settings(DEBUG=False)
+    def test_live_checkout_requires_a_valid_demo_payment_choice(self):
+        self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
+
         response = self.client.post(
             reverse('store:checkout'),
             {'shipping_address': 'Shipping', 'billing_address': 'Billing'},
         )
-        self.assertEqual(response.status_code, 404)
+
+        self.assertRedirects(response, reverse('store:checkout'))
         self.assertFalse(Order.objects.exists())
 
 

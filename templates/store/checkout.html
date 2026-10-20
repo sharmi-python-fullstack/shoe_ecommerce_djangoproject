@@ -30,16 +30,12 @@
                 Clearpay, or Klarna. No payment will be taken.
             </p>
             <div class="express-payment-options">
-                <button class="express-payment-button express-google-pay" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>Google Pay</button>
-                <button class="express-payment-button express-paypal" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>PayPal</button>
-                <button class="express-payment-button express-clearpay" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>Clearpay</button>
-                <button class="express-payment-button express-klarna" type="submit" {% if not demo_payments_enabled %}disabled{% endif %}>Klarna</button>
+                <button class="express-payment-button express-google-pay" type="submit" name="payment_method" value="google_pay">Google Pay</button>
+                <button class="express-payment-button express-paypal" type="submit" name="payment_method" value="paypal">PayPal</button>
+                <button class="express-payment-button express-clearpay" type="submit" name="payment_method" value="clearpay">Clearpay</button>
+                <button class="express-payment-button express-klarna" type="submit" name="payment_method" value="klarna">Klarna</button>
             </div>
-            {% if demo_payments_enabled %}
-            <p class="payment-demo-disclaimer">Choose an option to continue to the simulated payment step.</p>
-            {% else %}
-            <p class="checkout-unavailable" role="status">Demo payments are disabled on this live site. Connect a payment provider to accept real payments.</p>
-            {% endif %}
+            <p class="payment-demo-disclaimer">Choose an option to record a demo order. No real payment will be taken, and the order will remain unpaid.</p>
         </section>
     </form>
 </div>

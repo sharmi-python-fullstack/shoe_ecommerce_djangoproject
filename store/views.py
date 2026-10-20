@@ -429,7 +429,7 @@ def cart_detail(request):
 
 
 def checkout(request):
-    """Create an order and send the customer to the local test-payment page."""
+    """Create an order for local test payment or a clearly marked demo checkout."""
     if request.method not in {'GET', 'POST'}:
         return HttpResponseNotAllowed(['GET', 'POST'])
 
@@ -456,8 +456,16 @@ def checkout(request):
             },
         )
 
-    if not settings.DEBUG:
-        raise Http404
+    payment_method = request.POST.get('payment_method', '')
+    demo_payment_methods = {'google_pay', 'paypal', 'clearpay', 'klarna'}
+    is_demo_checkout = payment_method in demo_payment_methods
+    if payment_method and not is_demo_checkout:
+        messages.error(request, 'Choose one of the listed demo payment options.')
+        return redirect('store:checkout')
+    if not settings.DEBUG and not is_demo_checkout:
+        messages.error(request, 'Choose a demo checkout option to continue.')
+        return redirect('store:checkout')
+
     shipping_address = request.POST.get('shipping_address', '').strip()
     billing_address = request.POST.get('billing_address', '').strip()
     if not shipping_address or not billing_address:
@@ -475,6 +483,7 @@ def checkout(request):
         billing_address=billing_address,
         total_amount=total,
         paid=False,
+        demo_payment_method=payment_method if is_demo_checkout else '',
         checkout_session_key=request.session.session_key or '',
     )
     for prod, qty, size in items:
@@ -485,6 +494,9 @@ def checkout(request):
             size=size,
             price=prod.price,
         )
+    if is_demo_checkout:
+        _clear_order_items(order, request)
+        return redirect('store:checkout_success', order_id=order.pk)
     return redirect('store:test_payment', order_id=order.pk)
 
 
@@ -492,7 +504,7 @@ def test_payment(request, order_id):
     if not settings.DEBUG:
         raise Http404
     order = get_object_or_404(Order, pk=order_id)
-    if not _order_belongs_to_request(order, request):
+    if order.is_demo or not _order_belongs_to_request(order, request):
         raise Http404
     if request.method == 'POST':
         if not order.paid:
@@ -507,10 +519,14 @@ def test_payment(request, order_id):
 
 def checkout_success(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
-    if not _order_belongs_to_request(order, request) or not order.paid:
+    if not _order_belongs_to_request(order, request) or not (order.paid or order.is_demo):
         return redirect('store:cart_detail')
     return render(
         request,
         'store/checkout_success.html',
-        {'order': order, 'test_payment': settings.DEBUG},
+        {
+            'order': order,
+            'test_payment': settings.DEBUG and order.paid,
+            'demo_order': order.is_demo,
+        },
     )

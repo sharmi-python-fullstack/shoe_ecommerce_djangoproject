@@ -27,7 +27,7 @@ python manage.py runserver
 Visit `http://127.0.0.1:8000/` in a browser.
 
 ## Test checkout
-When running locally with Django `DEBUG=True`, submit the checkout form to open a local test-payment page. Click **Simulate successful payment** to mark the demo order placed and return to the smiley confirmation page. This is only a UI/workflow test: it does not open a payment provider, charge money, or verify an actual payment. The simulated-payment route is disabled when `DEBUG=False`. This project does not currently have a live payment integration.
+The checkout's Google Pay, PayPal, Clearpay, and Klarna buttons are demonstration choices only. Selecting one records an unpaid demo order and does not open a provider, charge money, or represent a purchase. In local development (`DEBUG=True`), the separate test-payment page can simulate a paid test order; that route is disabled when `DEBUG=False`. This project does not currently have a live payment integration.
 
 ## Product administration and categories
 - Open `http://127.0.0.1:8000/admin/` and sign in with the superuser account.
