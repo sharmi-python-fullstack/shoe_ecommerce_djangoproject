@@ -26,8 +26,26 @@ python manage.py runserver
 ```
 Visit `http://127.0.0.1:8000/` in a browser.
 
-## Test checkout
-The checkout's Google Pay, PayPal, Clearpay, and Klarna buttons are demonstration choices only. Selecting one records an unpaid demo order and does not open a provider, charge money, or represent a purchase. In local development (`DEBUG=True`), the separate test-payment page can simulate a paid test order; that route is disabled when `DEBUG=False`. This project does not currently have a live payment integration.
+## Razorpay test checkout
+Install dependencies with `pip install -r requirements.txt`, then set your Razorpay **Test Mode** credentials in your local environment:
+
+```powershell
+$env:RAZORPAY_KEY_ID = "rzp_test_your_key_id"
+$env:RAZORPAY_KEY_SECRET = "your_test_key_secret"
+python manage.py runserver
+```
+
+Locally, Razorpay checkout is enabled when `DEBUG=True`, the Key ID starts with `rzp_test_`, and both credentials are configured. The secret stays on the Django server. Django creates the Razorpay order and verifies the payment signature before marking the store order as paid. Use Razorpay's test payment methods and test credentials from its official documentation; no real payment is processed.
+
+To enable **test payments on Render**, keep `DEBUG=False` and add these environment variables to the web service:
+
+- `RAZORPAY_TEST_MODE_ENABLED` = `True`
+- `RAZORPAY_KEY_ID` = your Test Mode Key ID (starts with `rzp_test_`)
+- `RAZORPAY_KEY_SECRET` = your Test Mode Key Secret
+
+Razorpay checkout will only be enabled with an `rzp_test_` Key ID and a configured secret, even when the test-mode flag is enabled. Never put either credential in source code or commit them. Remove the test flag and test credentials when you no longer want to expose test checkout.
+
+The Google Pay, PayPal, Clearpay, and Klarna checkout buttons remain visual demo choices only. Selecting one records an unpaid demo order. With `DEBUG=True`, a separate local simulation is also available when no payment method is selected. Neither demo flow contacts a payment provider.
 
 ## Product administration and categories
 - Open `http://127.0.0.1:8000/admin/` and sign in with the superuser account.

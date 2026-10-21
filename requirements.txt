@@ -4,3 +4,4 @@ Pillow
 dj-database-url
 psycopg[binary]
 whitenoise
+razorpay

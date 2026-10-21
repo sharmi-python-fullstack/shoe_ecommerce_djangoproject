@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from razorpay.errors import SignatureVerificationError
+from unittest.mock import patch
 
 from .models import (
     Cart,
@@ -459,6 +461,122 @@ class ProductListTests(TestCase):
         self.assertEqual(self.client.session['cart'], {})
         order.refresh_from_db()
         self.assertTrue(order.paid)
+
+    @override_settings(
+        DEBUG=False,
+        RAZORPAY_ENABLED=True,
+        RAZORPAY_KEY_ID='rzp_test_example',
+        RAZORPAY_KEY_SECRET='test-secret',
+    )
+    @patch('store.views.razorpay.Client')
+    def test_razorpay_checkout_creates_remote_order_and_verifies_payment(
+        self, mock_client
+    ):
+        self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
+        self.assertContains(
+            self.client.get(reverse('store:checkout')),
+            'Pay securely with Razorpay (Test Mode)',
+        )
+        mock_client.return_value.order.create.return_value = {'id': 'order_test_123'}
+
+        checkout_response = self.client.post(
+            reverse('store:checkout'),
+            {
+                'shipping_address': 'Shipping',
+                'billing_address': 'Billing',
+                'payment_method': 'razorpay',
+            },
+        )
+
+        order = Order.objects.get()
+        self.assertRedirects(
+            checkout_response,
+            reverse('store:razorpay_payment', args=[order.pk]),
+        )
+        self.assertEqual(order.razorpay_order_id, 'order_test_123')
+        self.assertFalse(order.paid)
+        mock_client.return_value.order.create.assert_called_once_with(
+            data={
+                'amount': 299900,
+                'currency': 'INR',
+                'receipt': f'stepup-{order.pk}',
+            }
+        )
+        self.assertContains(
+            self.client.get(reverse('store:razorpay_payment', args=[order.pk])),
+            'rzp_test_example',
+        )
+
+        mock_client.return_value.utility.verify_payment_signature.return_value = None
+        verify_response = self.client.post(
+            reverse('store:verify_razorpay_payment', args=[order.pk]),
+            {
+                'razorpay_payment_id': 'pay_test_123',
+                'razorpay_order_id': 'order_test_123',
+                'razorpay_signature': 'valid-test-signature',
+            },
+        )
+
+        self.assertEqual(verify_response.status_code, 200)
+        self.assertEqual(
+            verify_response.json()['redirect_url'],
+            reverse('store:checkout_success', args=[order.pk]),
+        )
+        order.refresh_from_db()
+        self.assertTrue(order.paid)
+        self.assertEqual(order.razorpay_payment_id, 'pay_test_123')
+        self.assertFalse(self.client.session.get('cart'))
+        self.assertContains(
+            self.client.get(reverse('store:checkout_success', args=[order.pk])),
+            'This was a test payment simulation. No money was taken.',
+        )
+        mock_client.return_value.utility.verify_payment_signature.assert_called_once_with(
+            {
+                'razorpay_order_id': 'order_test_123',
+                'razorpay_payment_id': 'pay_test_123',
+                'razorpay_signature': 'valid-test-signature',
+            }
+        )
+
+    @override_settings(
+        DEBUG=True,
+        RAZORPAY_ENABLED=True,
+        RAZORPAY_KEY_ID='rzp_test_example',
+        RAZORPAY_KEY_SECRET='test-secret',
+    )
+    @patch('store.views.razorpay.Client')
+    def test_razorpay_checkout_does_not_mark_order_paid_for_invalid_signature(
+        self, mock_client
+    ):
+        self.client.post(reverse('store:add_to_cart', args=[self.product.id]))
+        mock_client.return_value.order.create.return_value = {'id': 'order_test_456'}
+        self.client.post(
+            reverse('store:checkout'),
+            {
+                'shipping_address': 'Shipping',
+                'billing_address': 'Billing',
+                'payment_method': 'razorpay',
+            },
+        )
+        order = Order.objects.get()
+        mock_client.return_value.utility.verify_payment_signature.side_effect = (
+            SignatureVerificationError('invalid signature')
+        )
+
+        response = self.client.post(
+            reverse('store:verify_razorpay_payment', args=[order.pk]),
+            {
+                'razorpay_payment_id': 'pay_test_invalid',
+                'razorpay_order_id': 'order_test_456',
+                'razorpay_signature': 'invalid-signature',
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        order.refresh_from_db()
+        self.assertFalse(order.paid)
+        self.assertIsNone(order.razorpay_payment_id)
+        self.assertTrue(self.client.session['cart'])
 
     @override_settings(DEBUG=False)
     def test_demo_payment_options_record_unpaid_orders_on_live_site(self):

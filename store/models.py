@@ -107,6 +107,12 @@ class Order(models.Model):
     billing_address = models.CharField(max_length=255)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     paid = models.BooleanField(default=False)
+    razorpay_order_id = models.CharField(
+        max_length=100, blank=True, null=True, unique=True
+    )
+    razorpay_payment_id = models.CharField(
+        max_length=100, blank=True, null=True, unique=True
+    )
     demo_payment_method = models.CharField(
         max_length=20,
         choices=DEMO_PAYMENT_METHOD_CHOICES,

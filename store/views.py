@@ -1,7 +1,8 @@
 from decimal import Decimal
+import logging
 
 from django.conf import settings
-from django.http import Http404, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import Http404, HttpResponseNotAllowed, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.db.models import Q
@@ -10,7 +11,19 @@ from django.core.exceptions import ValidationError
 from django.forms import EmailField
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.password_validation import validate_password
+from django.urls import reverse
+import razorpay
+from requests.exceptions import RequestException
+from razorpay.errors import (
+    BadRequestError,
+    GatewayError,
+    ServerError,
+    SignatureVerificationError,
+)
 from .models import ContactInquiry, Product, Cart, CartItem, Order, OrderItem, NewsletterSubscription
+
+logger = logging.getLogger(__name__)
+
 
 def _get_checkout_items(request):
     if request.user.is_authenticated:
@@ -453,17 +466,20 @@ def checkout(request):
                 ],
                 'total': total,
                 'demo_payments_enabled': settings.DEBUG,
+                'razorpay_enabled': settings.RAZORPAY_ENABLED,
             },
         )
 
     payment_method = request.POST.get('payment_method', '')
     demo_payment_methods = {'google_pay', 'paypal', 'clearpay', 'klarna'}
     is_demo_checkout = payment_method in demo_payment_methods
+    is_razorpay_checkout = payment_method == 'razorpay'
     if payment_method and not is_demo_checkout:
-        messages.error(request, 'Choose one of the listed demo payment options.')
-        return redirect('store:checkout')
-    if not settings.DEBUG and not is_demo_checkout:
-        messages.error(request, 'Choose a demo checkout option to continue.')
+        if not is_razorpay_checkout or not settings.RAZORPAY_ENABLED:
+            messages.error(request, 'Choose one of the available payment options.')
+            return redirect('store:checkout')
+    if not payment_method and not settings.DEBUG:
+        messages.error(request, 'Choose a payment option to continue.')
         return redirect('store:checkout')
 
     shipping_address = request.POST.get('shipping_address', '').strip()
@@ -497,7 +513,110 @@ def checkout(request):
     if is_demo_checkout:
         _clear_order_items(order, request)
         return redirect('store:checkout_success', order_id=order.pk)
+    if is_razorpay_checkout:
+        try:
+            payment_order = razorpay.Client(
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+            ).order.create(
+                data={
+                    'amount': int(total * 100),
+                    'currency': 'INR',
+                    'receipt': f'stepup-{order.pk}',
+                }
+            )
+        except (
+            BadRequestError,
+            GatewayError,
+            RequestException,
+            ServerError,
+        ):
+            logger.exception('Razorpay order creation failed for order %s.', order.pk)
+            messages.error(
+                request,
+                'Razorpay could not start the payment. Please try again.',
+            )
+            return redirect('store:checkout')
+        order.razorpay_order_id = payment_order['id']
+        order.save(update_fields=['razorpay_order_id'])
+        return redirect('store:razorpay_payment', order_id=order.pk)
     return redirect('store:test_payment', order_id=order.pk)
+
+
+def razorpay_payment(request, order_id):
+    if not settings.RAZORPAY_ENABLED:
+        raise Http404
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+    order = get_object_or_404(Order, pk=order_id)
+    if (
+        not _order_belongs_to_request(order, request)
+        or not order.razorpay_order_id
+        or order.is_demo
+    ):
+        raise Http404
+    if order.paid:
+        return redirect('store:checkout_success', order_id=order.pk)
+    return render(
+        request,
+        'store/razorpay_payment.html',
+        {'order': order, 'razorpay_key_id': settings.RAZORPAY_KEY_ID},
+    )
+
+
+def verify_razorpay_payment(request, order_id):
+    if not settings.RAZORPAY_ENABLED:
+        raise Http404
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    order = get_object_or_404(Order, pk=order_id)
+    if (
+        not _order_belongs_to_request(order, request)
+        or not order.razorpay_order_id
+        or order.is_demo
+    ):
+        raise Http404
+    if order.paid:
+        return JsonResponse({
+            'redirect_url': reverse('store:checkout_success', kwargs={'order_id': order.pk})
+        })
+
+    payment_id = request.POST.get('razorpay_payment_id', '')
+    gateway_order_id = request.POST.get('razorpay_order_id', '')
+    signature = request.POST.get('razorpay_signature', '')
+    if (
+        not payment_id
+        or not gateway_order_id
+        or not signature
+        or gateway_order_id != order.razorpay_order_id
+    ):
+        return JsonResponse(
+            {'error': 'The payment details could not be verified. Please try again.'},
+            status=400,
+        )
+
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
+    try:
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': gateway_order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature,
+        })
+    except SignatureVerificationError:
+        logger.warning('Invalid Razorpay signature for order %s.', order.pk)
+        return JsonResponse(
+            {'error': 'The payment could not be verified. Please contact support.'},
+            status=400,
+        )
+
+    order.razorpay_payment_id = payment_id
+    order.paid = True
+    order.save(update_fields=['razorpay_payment_id', 'paid'])
+    _clear_order_items(order, request)
+    return JsonResponse({
+        'redirect_url': reverse('store:checkout_success', kwargs={'order_id': order.pk})
+    })
 
 
 def test_payment(request, order_id):
@@ -526,7 +645,9 @@ def checkout_success(request, order_id):
         'store/checkout_success.html',
         {
             'order': order,
-            'test_payment': settings.DEBUG and order.paid,
+            'test_payment': order.paid and (
+                settings.DEBUG or bool(order.razorpay_payment_id)
+            ),
             'demo_order': order.is_demo,
         },
     )

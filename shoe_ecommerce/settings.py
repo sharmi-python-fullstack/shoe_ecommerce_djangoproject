@@ -47,6 +47,18 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_TEST_MODE_ENABLED = (
+    os.environ.get('RAZORPAY_TEST_MODE_ENABLED', '').lower()
+    in ('true', '1', 'yes')
+)
+RAZORPAY_ENABLED = (
+    RAZORPAY_KEY_ID.startswith('rzp_test_')
+    and bool(RAZORPAY_KEY_SECRET)
+    and (DEBUG or RAZORPAY_TEST_MODE_ENABLED)
+)
+
 
 # Application definition
 

@@ -1,0 +1,93 @@
+{% extends "store/base.html" %}
+{% load humanize %}
+{% block title %}Razorpay Test Payment | StepUp.in{% endblock %}
+
+{% block content %}
+<div class="page-width checkout-page">
+    <a class="page-back" href="{% url 'store:cart_detail' %}">← Back to cart</a>
+    <h1>Razorpay test payment</h1>
+    <section class="checkout-summary" aria-labelledby="razorpay-payment-summary">
+        <h2 id="razorpay-payment-summary">Order #{{ order.id }}</h2>
+        <p>
+            <span>Amount (INR)</span>
+            <strong>₹ {{ order.total_amount|floatformat:2|intcomma }}</strong>
+        </p>
+    </section>
+    <p class="payment-demo-notice">
+        Test mode only. No real money will be charged.
+    </p>
+    <p id="razorpay-payment-message" role="status" aria-live="polite"></p>
+    <button class="cart-checkout" id="razorpay-pay-button" type="button">
+        Pay with Razorpay
+    </button>
+</div>
+{{ order.total_amount|floatformat:2|json_script:"razorpay-amount" }}
+{{ order.razorpay_order_id|json_script:"razorpay-order-id" }}
+{{ razorpay_key_id|json_script:"razorpay-key-id" }}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const payButton = document.getElementById('razorpay-pay-button');
+    const paymentMessage = document.getElementById('razorpay-payment-message');
+    const csrfToken = '{{ csrf_token }}';
+    const paymentOptions = {
+        key: JSON.parse(document.getElementById('razorpay-key-id').textContent),
+        amount: Math.round(
+            Number(JSON.parse(document.getElementById('razorpay-amount').textContent)) * 100
+        ),
+        currency: 'INR',
+        name: 'StepUp.in',
+        description: 'Shoe order #{{ order.id }}',
+        order_id: JSON.parse(document.getElementById('razorpay-order-id').textContent),
+        handler: async function (response) {
+            paymentMessage.textContent = 'Verifying your payment...';
+            payButton.disabled = true;
+            try {
+                const result = await fetch(
+                    '{% url "store:verify_razorpay_payment" order.id %}',
+                    {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: new URLSearchParams(response)
+                    }
+                );
+                const data = await result.json();
+                if (!result.ok) {
+                    throw new Error(data.error || 'Payment verification failed.');
+                }
+                window.location.assign(data.redirect_url);
+            } catch (error) {
+                paymentMessage.textContent = error.message;
+                payButton.disabled = false;
+            }
+        },
+        modal: {
+            ondismiss: function () {
+                paymentMessage.textContent = 'Payment was not completed. You can try again.';
+            }
+        },
+        theme: { color: '#1769e0' }
+    };
+
+    payButton.addEventListener('click', function () {
+        if (!window.Razorpay) {
+            paymentMessage.textContent = 'Razorpay Checkout could not be loaded. Check your connection and try again.';
+            return;
+        }
+        const checkout = new Razorpay(paymentOptions);
+        checkout.on('payment.failed', function (event) {
+            const error = event.error || {};
+            const details = [error.code, error.description]
+                .filter(Boolean)
+                .join(': ');
+            paymentMessage.textContent = details
+                ? `Razorpay reported: ${details}. Close the payment window and try again.`
+                : 'Razorpay could not complete the payment. Close the payment window and try again.';
+        });
+        checkout.open();
+    });
+</script>
+{% endblock %}
